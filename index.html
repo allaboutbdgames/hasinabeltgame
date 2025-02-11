@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Belt Game Challenge</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #1a1a1a;
+            font-family: 'Arial Black', sans-serif;
+            touch-action: manipulation;
+            min-height: 100vh;
+        }
+
+        /* Start Screen Styles */
+        #start-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: linear-gradient(45deg, #2a2a2a, #1a1a1a);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #ffd700;
+            text-align: center;
+            z-index: 1000;
+            padding: 20px;
+        }
+
+        .character-showcase {
+            display: flex;
+            justify-content: center;
+            gap: 5vmin;
+            margin: 5vmin 0;
+            flex-wrap: wrap;
+        }
+
+        .character-showcase img {
+            width: 25vmin;
+            height: 25vmin;
+            border: 3px solid #ffd700;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+            object-fit: contain;
+            background: white;
+            padding: 5px;
+        }
+
+        #start-button {
+            background: linear-gradient(45deg, #ff0000, #ff4500);
+            color: white;
+            border: 2px solid #ffd700;
+            padding: 15px 30px;
+            font-size: 1.5rem;
+            cursor: pointer;
+            border-radius: 50px;
+            margin-top: 2rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 15px rgba(255, 0, 0, 0.5);
+        }
+
+        #start-button:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 25px rgba(255, 0, 0, 0.8);
+        }
+
+        /* Game Container */
+        #game-container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            display: none;
+        }
+
+        /* Target Styles */
+        #target {
+            position: absolute;
+            width: 20vmin;
+            height: 20vmin;
+            display: none;
+            cursor: pointer;
+            transition: all 0.3s;
+            transform: scale(0);
+            object-fit: contain;
+        }
+
+        /* Belt Styles */
+        #belt {
+            position: absolute;
+            width: 15vmin;
+            height: 6vmin;
+            display: none;
+            transform-origin: left center;
+            object-fit: contain;
+        }
+
+        /* Score Display */
+        #score {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            color: #ffd700;
+            font-size: 6vmin;
+            text-shadow: 0 0 10px #ff0000;
+            z-index: 100;
+        }
+
+        /* Cultural Text Effects */
+        .cultural-text {
+            position: absolute;
+            color: #ff0000;
+            font-size: 2em;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px black;
+            animation: textPop 1s forwards;
+        }
+
+        @keyframes textPop {
+            0% { transform: scale(0); opacity: 0; }
+            50% { transform: scale(1.2); opacity: 1; }
+            100% { transform: scale(1); opacity: 0; }
+        }
+
+        /* Victory Popup */
+        .victory-popup {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #000;
+            color: #ffd700;
+            padding: 5vmin;
+            border: 3px solid #ff0000;
+            border-radius: 15px;
+            text-align: center;
+            display: none;
+            z-index: 1000;
+            font-size: 4vmin;
+            text-shadow: 0 0 10px #ff0000;
+            width: 80vmin;
+        }
+
+        .victory-images {
+            display: flex;
+            justify-content: center;
+            gap: 3vmin;
+            margin: 3vmin 0;
+        }
+
+        .victory-images img {
+            width: 20vmin;
+            height: 20vmin;
+            border: 2px solid #ffd700;
+            border-radius: 10px;
+            object-fit: contain;
+            background: white;
+            padding: 5px;
+        }
+
+        .improved-restart {
+            background: linear-gradient(45deg, #ff0000, #ff4500);
+            color: white;
+            border: 2px solid #ffd700;
+            padding: 10px 25px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            border-radius: 50px;
+            margin-top: 2vmin;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 15px rgba(255, 0, 0, 0.5);
+        }
+
+        .improved-restart:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 25px rgba(255, 0, 0, 0.8);
+        }
+
+        @keyframes targetAppear {
+            0% { transform: scale(0); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+
+        @media (min-width: 768px) {
+            #game-container {
+                width: 800px;
+                height: 500px;
+                margin: 20px auto;
+            }
+            
+            #score {
+                font-size: 42px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Start Screen -->
+    <div id="start-screen">
+        <h1 id="game-title">Wazed Miah Vs Hasina</h1>
+        <h2>Belt Showdown</h2>
+        
+        <div class="character-showcase">
+            <img src="https://www.councilwomenworldleaders.org/uploads/1/2/3/0/123069119/screen-shot-2021-06-17-at-12-57-47-am_orig.png" alt="Target">
+            <img src="https://pngimg.com/d/belt_PNG9570.png" alt="Belt">
+        </div>
+
+        <button id="start-button" class="improved-restart">🏁 Start Game! 🏁</button>
+    </div>
+
+    <!-- Game Interface -->
+    <div id="score">0/7</div>
+    <div id="game-container">
+        <img id="target" src="https://www.councilwomenworldleaders.org/uploads/1/2/3/0/123069119/screen-shot-2021-06-17-at-12-57-47-am_orig.png">
+        <img id="belt" src="https://pngimg.com/d/belt_PNG9570.png">
+    </div>
+
+    <!-- Victory Popup -->
+    <div class="victory-popup" id="victoryPopup">
+        <h2> ওই Wazed জোরে pls 👄 </h2>
+        <p>ঊফফফফফফফ</p>
+        <div class="victory-images">
+            <img src="https://www.councilwomenworldleaders.org/uploads/1/2/3/0/123069119/screen-shot-2021-06-17-at-12-57-47-am_orig.png">
+            <img src="https://www.pngall.com/wp-content/uploads/2016/05/Belt-PNG.png">
+        </div>
+        <button class="improved-restart" onclick="restartGame()">🔄 Play Again? 🔄</button>
+    </div>
+
+    <!-- Audio Elements -->
+    <audio id="hitSound">
+        <source src="anime-ahh.mp3" type="audio/mpeg">
+    </audio>
+
+    <script>
+        // Game Elements
+        const startScreen = document.getElementById('start-screen');
+        const gameContainer = document.getElementById('game-container');
+        const target = document.getElementById('target');
+        const belt = document.getElementById('belt');
+        const scoreElement = document.getElementById('score');
+        const victoryPopup = document.getElementById('victoryPopup');
+        const hitSound = document.getElementById('hitSound');
+        
+        // Game State
+        let score = 0;
+        let isBeltMoving = false;
+        let gameActive = false;
+
+        // Initialize Game
+        function initGame() {
+            startScreen.style.display = 'none';
+            gameContainer.style.display = 'block';
+            scoreElement.style.display = 'block';
+            gameActive = true;
+            startGame();
+        }
+
+        // Game Setup
+        function startGame() {
+            function setGameSize() {
+                if(window.innerWidth >= 768) {
+                    gameContainer.style.width = '800px';
+                    gameContainer.style.height = '500px';
+                } else {
+                    gameContainer.style.width = '100vw';
+                    gameContainer.style.height = '100vh';
+                }
+            }
+            setGameSize();
+            window.addEventListener('resize', setGameSize);
+
+            const gameLoop = setInterval(() => {
+                if(gameActive && Math.random() < 0.5 && !isBeltMoving) {
+                    showTarget();
+                }
+            }, 500);
+        }
+
+        // Show Target
+        function showTarget() {
+            target.style.display = 'block';
+            const containerRect = gameContainer.getBoundingClientRect();
+            target.style.left = Math.random() * (containerRect.width - target.offsetWidth) + 'px';
+            target.style.top = Math.random() * (containerRect.height - target.offsetHeight - 50) + 'px';
+            target.style.animation = 'targetAppear 0.3s forwards';
+            
+            setTimeout(() => {
+                if(target.style.display === 'block') {
+                    target.style.display = 'none';
+                    target.style.transform = 'scale(0)';
+                }
+            }, 700);
+        }
+
+        // Throw Belt
+        function throwBelt(e) {
+            if(!gameActive || isBeltMoving || e.target.id !== 'target') return;
+            
+            isBeltMoving = true;
+            belt.style.display = 'block';
+            
+            const containerRect = gameContainer.getBoundingClientRect();
+            const startX = containerRect.width/2 - belt.offsetWidth/2;
+            const startY = containerRect.height - belt.offsetHeight - 20;
+            belt.style.left = startX + 'px';
+            belt.style.top = startY + 'px';
+
+            const targetX = parseFloat(target.style.left) + target.offsetWidth/2;
+            const targetY = parseFloat(target.style.top) + target.offsetHeight/2;
+            const angle = Math.atan2(targetY - startY, targetX - startX);
+            
+            belt.style.transform = `rotate(${angle}rad)`;
+
+            let progress = 0;
+            const animate = () => {
+                progress += 0.1;
+                const x = startX + (targetX - startX) * progress;
+                const y = startY + (targetY - startY) * progress;
+                
+                belt.style.left = x + 'px';
+                belt.style.top = y + 'px';
+
+                if(progress >= 1) {
+                    handleHit();
+                    resetBelt();
+                } else {
+                    requestAnimationFrame(animate);
+                }
+            };
+            animate();
+        }
+
+        // Handle Hit
+        function handleHit() {
+            score++;
+            scoreElement.textContent = `${score}/7`;
+            
+            // Play hit sound
+            hitSound.currentTime = 0;
+            hitSound.play();
+
+            // Show cultural text
+            const phrases = ['হাসিনা মাগি', 'হাসিনা মাগি', 'হাসিনা মাগি'];
+            const text = document.createElement('div');
+            text.className = 'cultural-text';
+            text.textContent = phrases[Math.floor(Math.random() * phrases.length)];
+            text.style.left = target.style.left;
+            text.style.top = target.style.top;
+            gameContainer.appendChild(text);
+            setTimeout(() => text.remove(), 1000);
+
+            if(score >= 7) {
+                victoryPopup.style.display = 'block';
+                gameActive = false;
+            }
+        }
+
+        // Reset Belt
+        function resetBelt() {
+            isBeltMoving = false;
+            belt.style.display = 'none';
+            belt.style.transform = 'none';
+        }
+
+        // Restart Game
+        function restartGame() {
+            score = 0;
+            scoreElement.textContent = '0/7';
+            victoryPopup.style.display = 'none';
+            target.style.display = 'none';
+            resetBelt();
+            gameActive = true;
+        }
+
+        // Event Listeners
+        document.getElementById('start-button').addEventListener('click', initGame);
+        document.addEventListener('click', throwBelt);
+        document.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            if(e.target.id === 'target') {
+                throwBelt(e);
+            }
+        });
+    </script>
+</body>
+</html>
